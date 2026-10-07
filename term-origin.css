@@ -1,0 +1,70 @@
+/* term-origin.css
+ * 「💭 怎么来的」旁注，只作用于 cssclasses 带 term-origin 的笔记。
+ * 阅读视图：正文容器宽 ≥ 960px 时，[!origin] callout 挂到正文右侧当旁注；
+ *           不够宽时，退回成标题下面一条折叠栏，点开再看。
+ * 宽度跟着 .markdown-preview-sizer 走：改 wide-readable-width 的行宽、拖窗口、开关侧栏，
+ * 旁注宽度和正文宽度都会自动重算，不会互相压住。
+ */
+
+/* ---------- 外观（阅读视图和编辑视图通用） ---------- */
+.term-origin .callout[data-callout="origin"] {
+  --callout-color: 130, 130, 155;
+  margin: 0.3em 0 0.6em;
+  padding: 0.15em 0 0.15em 0.9em;
+  background: transparent;
+  border: none;
+  border-left: 2px solid rgba(var(--callout-color), 0.45);
+  border-radius: 0;
+  mix-blend-mode: normal;
+}
+.term-origin .callout[data-callout="origin"] .callout-icon { display: none; }
+.term-origin .callout[data-callout="origin"] .callout-title {
+  padding: 0;
+  gap: 0.3em;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.term-origin .callout[data-callout="origin"] .callout-content {
+  padding: 0;
+  font-size: 0.86em;
+  color: var(--text-muted);
+}
+.term-origin .callout[data-callout="origin"] .callout-content p {
+  margin-block: 0.55em;
+  line-height: 1.75;
+}
+
+/* ---------- 阅读视图：宽度够时变成右侧旁注 ---------- */
+.markdown-preview-view.term-origin .markdown-preview-sizer {
+  container: term-origin / inline-size;
+}
+
+@container term-origin (min-width: 960px) {
+  /* 变量必须放在子元素上：容器查询不能给容器自己设样式 */
+  .term-origin .markdown-preview-sizer > div {
+    --origin-w: clamp(280px, 30cqw, 400px);
+    --origin-gap: 32px;
+    /* 所有正文块给右边让出一条旁注栏 */
+    padding-right: calc(var(--origin-w) + var(--origin-gap));
+  }
+
+  /* 旁注本身浮进那条栏里 */
+  .term-origin .markdown-preview-sizer > div:has(> .callout[data-callout="origin"]) {
+    float: right;
+    clear: right;
+    width: var(--origin-w);
+    padding-right: 0;
+  }
+  .term-origin .callout[data-callout="origin"] { margin: 0.2em 0 1em; }
+
+  /* 下一个词条、下一节开始前，等上一条旁注结束，避免错位 */
+  .term-origin .markdown-preview-sizer h2,
+  .term-origin .markdown-preview-sizer h3,
+  .term-origin .markdown-preview-sizer hr { clear: right; }
+
+  /* 旁注模式下始终展开，不显示折叠箭头 */
+  .term-origin .callout[data-callout="origin"] .callout-content { display: block !important; }
+  .term-origin .callout[data-callout="origin"] .callout-fold { display: none; }
+  .term-origin .callout[data-callout="origin"] .callout-title { pointer-events: none; }
+}
